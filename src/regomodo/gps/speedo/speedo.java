@@ -9,19 +9,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class speedo extends Activity {
-	TextView spd, alt;
+	TextView spd, alt,trip;
 	LocationManager lm;
 	Toast msg;
+	Location last_loc;
+	Float trip_dist = (float) 0.0;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         spd = (TextView) findViewById(R.id.speedo);
-        alt = (TextView) findViewById(R.id.altitude);
+        alt = (TextView) findViewById(R.id.accuracy);
+        trip = (TextView) findViewById(R.id.trip_dist);
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        Location lastKnownLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        new_loc(lastKnownLocation);
+        last_loc = null;
+        request_updates();
+    }
+        
+    public void request_updates() {
         if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
         	Toast.makeText(this, "GPS is Enabled in your device", Toast.LENGTH_SHORT).show();
             lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,0, 0, locationListener);
@@ -30,6 +36,16 @@ public class speedo extends Activity {
         	Toast.makeText(this, "GPS is Disabled in your device", Toast.LENGTH_SHORT).show();	
         }
     }
+    
+
+//    public void onStop() {
+//    	lm.removeUpdates(locationListener);
+//    }
+//    
+//    public void onRestart() {
+//    	request_updates();
+//    }
+
     
 
     
@@ -55,9 +71,23 @@ public class speedo extends Activity {
     };
     
     public void new_loc(Location loc){
-    	float speed_now = (loc.getSpeed() * 60 * 60)/1601;
-    	spd.setText(Float.toString(speed_now));
-    	alt.setText(Float.toString(loc.getAccuracy()));
+    	int speed_now = (int) (loc.getSpeed() * 60 * 60)/1601;
+    	
+    	if (speed_now > 0) {
+    		// Getting spurious values when not moving
+    		// Probably accuracy related
+    		if (last_loc != null) {
+    			trip_dist += loc.distanceTo(last_loc);
+    			
+    		}
+    		last_loc = loc;
+    	}
+    	
+    	spd.setText(Integer.toString(speed_now));
+    	alt.setText(Integer.toString((int) loc.getAccuracy()));
+    	trip.setText(Float.toString(trip_dist));
+    	
+    	
     }
  
 
