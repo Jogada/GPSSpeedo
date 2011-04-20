@@ -2,6 +2,7 @@ package regomodo.gps.speedo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -20,8 +21,12 @@ public class speedo extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         spd = (TextView) findViewById(R.id.speedo);
-        alt = (TextView) findViewById(R.id.accuracy);
         trip = (TextView) findViewById(R.id.trip_dist);
+
+    	Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Ni7seg.ttf");
+    	spd.setTypeface(tf);
+    	trip.setTypeface(tf);
+    	
         lm = (LocationManager) getSystemService(LOCATION_SERVICE);
         last_loc = null;
         request_updates();
@@ -38,17 +43,6 @@ public class speedo extends Activity {
     }
     
 
-//    public void onStop() {
-//    	lm.removeUpdates(locationListener);
-//    }
-//    
-//    public void onRestart() {
-//    	request_updates();
-//    }
-
-    
-
-    
     LocationListener locationListener = new LocationListener() {
     	   public void onLocationChanged(Location location) {
     		   new_loc(location);
@@ -82,16 +76,19 @@ public class speedo extends Activity {
     		}
     		last_loc = loc;
     	}
+    	if (trip_dist > 9999){
+    		trip_dist = (float) 0;
+    	}
+    	int odom_miles = (int) (trip_dist/1601);
+    	String speed = String.format("%02d", speed_now);    	
+    	String dist = String.format("%04d", odom_miles);
     	
-    	spd.setText(Integer.toString(speed_now));
-    	alt.setText(Integer.toString((int) loc.getAccuracy()));
-    	trip.setText(Float.toString(trip_dist));
-    	
+    	spd.setText(speed);
+    	trip.setText(dist);
     	
     }
  
 
-
-
-
 }
+
+
